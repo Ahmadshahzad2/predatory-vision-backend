@@ -1,0 +1,10 @@
+__pycache__
+env
+images.jpeg
+lambda_function.py
+output_image.jpg
+output_video.avi
+test_vids.mp4
+test_endpoint.py
+results/test_vids_processed.mp4
+results/images_processed.jpg
