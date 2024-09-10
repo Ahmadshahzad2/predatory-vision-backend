@@ -6,9 +6,14 @@ import os
 import io
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from flask_cors import CORS
+
 
 
 app = Flask(__name__)
+
+CORS(app)
+
 
 @app.route('/process-image', methods=['POST'])
 def process_image():
