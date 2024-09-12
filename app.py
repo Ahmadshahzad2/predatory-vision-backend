@@ -1,4 +1,4 @@
-from flask import Flask, request, send_file
+from flask import Flask, request, send_file,jsonify
 from utils import send_image_to_lambda
 import cv2
 import tempfile
@@ -7,6 +7,13 @@ import io
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from flask_cors import CORS
+import boto3
+
+# Initialize the S3 client
+s3 = boto3.client('s3')
+
+# Set your S3 bucket name
+S3_BUCKET_NAME = 'predatoryanimalvision'
 
 
 
@@ -71,6 +78,60 @@ def process_image():
     
 #     return send_file(output_video_path, mimetype='video/mp4', as_attachment=True, attachment_filename='processed_' + file.filename)
 
+# @app.route('/process-video', methods=['POST'])
+# def process_video():
+#     file = request.files['file']
+#     temp_dir = tempfile.mkdtemp()
+#     input_video_path = os.path.join(temp_dir, file.filename)
+#     output_video_path = os.path.join(temp_dir, 'processed_' + file.filename)
+    
+#     file.save(input_video_path)
+    
+#     cap = cv2.VideoCapture(input_video_path)
+#     fps = cap.get(cv2.CAP_PROP_FPS)  # Get the FPS from the input video
+#     frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+#     frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+#     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+#     out = cv2.VideoWriter(output_video_path, fourcc, fps, (frame_width, frame_height), True)
+    
+#     frames = []
+#     frame_ids = []
+#     count = 0
+
+#     while True:
+#         ret, frame = cap.read()
+#         if not ret:
+#             break
+#         frames.append(frame)
+#         frame_ids.append(count)
+#         count += 1
+        
+#         # Process in batches of 30
+#         if len(frames) == 60:
+#             print(count)
+#             start=time.time()
+
+#             processed_frames = process_frames_concurrently(frames)
+#             diff=time.time()-start
+#             print(diff)
+#             for processed_frame in processed_frames:
+#                 out.write(processed_frame)
+#             frames = []
+#             frame_ids = []
+
+#     # Process any remaining frames
+#     if frames:
+#         processed_frames = process_frames_concurrently(frames)
+#         for processed_frame in processed_frames:
+#             out.write(processed_frame)
+
+#     cap.release()
+#     out.release()
+    
+#     return send_file(output_video_path, mimetype='video/mp4', as_attachment=True, download_name='processed_' + file.filename)
+
+
+
 @app.route('/process-video', methods=['POST'])
 def process_video():
     file = request.files['file']
@@ -120,8 +181,22 @@ def process_video():
 
     cap.release()
     out.release()
+
+    # Upload the processed video to S3
+    s3_file_key = f"processed_videos/processed_{file.filename}"  # Define the path inside your S3 bucket
+    s3.upload_file(output_video_path, S3_BUCKET_NAME, s3_file_key)
+
+    # Generate the S3 URL
+    s3_url = f"https://{S3_BUCKET_NAME}.s3.amazonaws.com/{s3_file_key}"
+
+    # Clean up the temporary directory
+    os.remove(input_video_path)
+    os.remove(output_video_path)
+    os.rmdir(temp_dir)
     
-    return send_file(output_video_path, mimetype='video/mp4', as_attachment=True, download_name='processed_' + file.filename)
+    return jsonify({'url': s3_url})
+
+
 
 # def process_frames_concurrently(frames):
 #     """
