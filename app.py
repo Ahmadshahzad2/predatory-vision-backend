@@ -100,7 +100,7 @@ def process_video():
         count += 1
         
         # Process in batches of 30
-        if len(frames) == 30:
+        if len(frames) == 60:
             print(count)
             start=time.time()
 
@@ -142,7 +142,7 @@ def process_frames_concurrently(frames):
     This function takes a list of frames, sends them to Lambda concurrently,
     and returns the processed frames in the order they were submitted.
     """
-    with ThreadPoolExecutor(max_workers=30) as executor:
+    with ThreadPoolExecutor(max_workers=60) as executor:
         # Submit all frames to the executor and keep track of the order using the index
         future_to_index = {executor.submit(send_image_to_lambda, frame): idx for idx, frame in enumerate(frames)}
         processed_frames = [None] * len(frames)  # Preallocate the list to maintain order

@@ -34,7 +34,7 @@ def send_image_to_lambda(image):
     lambda_client = boto3.client('lambda', region_name='us-west-2',)
     
     response = lambda_client.invoke(
-        FunctionName='Yolo',
+        FunctionName='ultralytics',
         InvocationType='RequestResponse',
         Payload=payload  # Make sure Payload is a JSON string
     )
