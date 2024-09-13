@@ -145,7 +145,7 @@ def process_video():
     fps = cap.get(cv2.CAP_PROP_FPS)  # Get the FPS from the input video
     frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    fourcc = cv2.VideoWriter_fourcc(*'avc1')  # H.264 codec
+    fourcc = cv2.VideoWriter_fourcc(*'VP80')
     out = cv2.VideoWriter(output_video_path, fourcc, fps, (frame_width, frame_height), True)
     
     frames = []
