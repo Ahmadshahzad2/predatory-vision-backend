@@ -184,7 +184,16 @@ def process_video():
 
     # Upload the processed video to S3
     s3_file_key = f"processed_videos/processed_{file.filename}"  # Define the path inside your S3 bucket
-    s3.upload_file(output_video_path, S3_BUCKET_NAME, s3_file_key)
+    s3.upload_file(
+        output_video_path,
+        S3_BUCKET_NAME,
+        s3_file_key,
+        ExtraArgs={
+            'ContentType': 'video/mp4',
+            'ContentDisposition': 'inline'  # Set Content-Disposition to inline
+        }
+    )
+
 
     # Generate the S3 URL
     s3_url = f"https://{S3_BUCKET_NAME}.s3.amazonaws.com/{s3_file_key}"
